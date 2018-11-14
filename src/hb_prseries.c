@@ -156,7 +156,7 @@ char *argv[];
        exit(1);
    }
    if (!nfiles) {
-       fprintf(stderr,"\nExpecting input from stdin ... ");
+       fprintf(stderr,"\nhb_prseries: Expecting input from stdin ... ");
        infile = stdin;
    }
    
@@ -251,7 +251,18 @@ void get_hydro_data(FILE *file)
 	   pbot = p[hdr.nobs-1];
 	   newdata.observ[(int)PR][0] = ptop;   
 	   npts = 1;
-	   while (ptop < pbot) {
+
+	   /* Original while loop header is below.  In this case,
+	    * it is possible to overrun the total length of the data
+	    * because the new pressure level, ptop += prsint, is
+	    * created after the pressure check.
+	    while (ptop < pbot) {  */
+
+	   /* Instead, the check should be as below to check for the
+	    * next pressure level not exceeding the available data,
+	    * otherwise hb_interp returns -99999 and that extreme
+	    * value is set to HB_MISSING during the data writing process.*/
+	   while ( (ptop + prsint) < pbot ) {
 	      ptop +=prsint;
 	      newdata.observ[(int)PR][npts++] = ptop;
 	   }

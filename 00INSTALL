@@ -1,0 +1,55 @@
+ 1) You need the netCDF C libraries version 3.5 or later
+    (Do NOT use version 3.4)
+    
+    A tar distribution from UCAR is included on this ftp site.
+    Or go to web site: http://www.unidata.ucar.edu/packages/netcdf/index.html
+    
+    untar and build netcdf-3.5.0.tar.gz
+    
+    there is a README file in this UCAR distribution
+
+
+ 2) Create a directory for installing HydroBase (mkdir /usr/local/HydroBase3)
+    This will be referred to as $HB_HOME 
+    cd $HB_HOME/src 
+    copy makefile.dist to makefile
+    edit makefile with appropriate values for the following:
+
+**************************************   
+These lines must be edited: 
+**************************************   
+INCLUDE= .
+NETCDFLIB = /usr/local/netcdf-3.6/lib
+NETCDFINC = /usr/local/netcdf-3.6/include
+BINDIR = ../bin
+CC= gcc                     # invoke your C compiler
+CFLAGS=-c -I$(INCLUDE)      # compile, include  
+LINK= gcc
+LDFLAGS = 		    # any linker flags
+LIBS= -lm -lc               # math, c libs 
+**************************************   
+
+
+3)Edit hb_paths.h with correct path to the HydroBase3 /lib subdirectory
+     where the topography file and gamma.nc file are stored   
+     (i.e. $HB_HOME/lib). 
+     
+  4) create $BINDIR if it does not exist
+     
+     
+  5) make and install:
+  
+  Type the following commands:
+  
+   make hydrobase
+   make install
+   make clean
+   
+   to add OPTIONAL modules:
+   
+   make other
+   make install_other
+   make clean_all
+   
+   
+  6)  That's it.

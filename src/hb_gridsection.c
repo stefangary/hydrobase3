@@ -389,13 +389,13 @@ NEXTFILE:
 	         if (zwork[i] >= masked) {
 		     rad = ylen +1;   /* suspend search */
 		 }
-		  else if (zwork[i] <= flagged) {
-		      --i;
-		      ++rad;
-		  }
-		  else  {
-		       found1 = 1;
-		  }
+		 else if (zwork[i] <= flagged) {
+		   --i;
+		   ++rad;
+		 }
+		 else  {
+		   found1 = 1;
+		 }
 	     } /* end while */
 	     
 	     if (found1) {
@@ -442,90 +442,88 @@ NEXTFILE:
   
 /* explicitly generate x-vector corresponding to grid*/  
   for (col = 0; col < h.nx; ++ col) {
-     ij2xy(&h, col, 0, &x, &y);
-     xwork[col] = x;
+    ij2xy(&h, col, 0, &x, &y);
+    xwork[col] = x;
   }
   
-   for (row = 0; row < h.ny; ++row) {
-       for (col = 0; col < h.nx; ++col) {
-         sq = row * h.nx + col;
-	 zwork[col] = z[sq];
-       } 
+  for (row = 0; row < h.ny; ++row) {
+    for (col = 0; col < h.nx; ++col) {
+      sq = row * h.nx + col;
+      zwork[col] = z[sq];
+    } 
        
-       for (col = 0; col < h.nx; ++col) {
-         if (zwork[col] <= flagged) {  
-	 /* search backward and forward in array to find neighbors within xlen.
-	    Interpolate if 2 neighbors are found, Extrapolate if only 1 */
+    for (col = 0; col < h.nx; ++col) {
+      if (zwork[col] <= flagged) {  
+	/* search backward and forward in array to find neighbors within xlen.
+	   Interpolate if 2 neighbors are found, Extrapolate if only 1 */
 	    
-	    found1 = 0;
-	    rad = 1;
-	    i = col-1;
-	    while (i >= 0 && rad <= xlen && !found1) {
-	         if (zwork[i] >= masked)  {
-		    rad = xlen + 1;   /* suspend search */
-		 }
-		 else if (zwork[i] <= flagged) {
-		    --i;
-		    ++rad;
-		 }
-		 else {
-		    found1 = 1;
-		 }
-	    } /* end while */
-	    
-	    
-	       z1 = zwork[i];
-	       x1 = xwork[i];
-	    
+	found1 = 0;
+	rad = 1;
+	i = col-1;
+	while (i >= 0 && rad <= xlen && !found1) {
+	  if (zwork[i] >= masked)  {
+	    rad = xlen + 1;   /* suspend search */
+	  }
+	  else if (zwork[i] <= flagged) {
+	    --i;
+	    ++rad;
+	  }
+	  else {
+	    found1 = 1;
+	  }
+	} /* end while */
+	        
+	z1 = zwork[i];
+	x1 = xwork[i];
 	       
-	      found2 = 0;
-	      rad = 1;
-	      i = col + 1;
-	      while (i < h.nx && rad <= xlen && !found2 ) {
-	         if (zwork[i] >= masked)  {
-		     rad = xlen + 1;  /* suspend search */
-		  }
-		 else if (zwork[i] <= flagged) {
-		     ++i;
-		     ++rad;
-		 }
-		 else  {
-		    found2 = 1;
-		 }
-		 
-		 		 
-		 z2 = zwork[i];
-		 x2 = xwork[i];
-		 
-		 if (found1 && found2) {
-		    zwork[col] = z1 + (z2 - z1) * (xwork[col] - x1) / (x2 - x1);
-		    ++n_set;
-		 }
-		 else if (found1){
-		    zwork[col] = z1;
-		    ++n_set;
-		 }
-		 else if (found2) {
-		    zwork[col] = z2;
-		    ++n_set;
-		 } 
-		 else {
-		    ++n_empty;  
-		 }
-
-	      }  /* end while */ 
-	      
-	 }  /* end if zwork[col] */
-       }/* end for col */
+	found2 = 0;
+	rad = 1;
+	i = col + 1;
+	while (i < h.nx && rad <= xlen && !found2 ) {
+	  if (zwork[i] >= masked)  {
+	    rad = xlen + 1;  /* suspend search */
+	  }
+	  else if (zwork[i] <= flagged) {
+	    ++i;
+	    ++rad;
+	  }
+	  else  {
+	    found2 = 1;
+	  }
+	  
+	  
+	  z2 = zwork[i];
+	  x2 = xwork[i];
+	  
+	  if (found1 && found2) {
+	    zwork[col] = z1 + (z2 - z1) * (xwork[col] - x1) / (x2 - x1);
+	    ++n_set;
+	  }
+	  else if (found1){
+	    zwork[col] = z1;
+	    ++n_set;
+	  }
+	  else if (found2) {
+	    zwork[col] = z2;
+	    ++n_set;
+	  } 
+	  else {
+	    ++n_empty;  
+	  }
+	  
+	}  /* end while */ 
+	
+      }  /* end if zwork[col] */
+    }/* end for col */
        
-             /* load zwork back into z */
+    /* load zwork back into z */
       
-       for (col = 0; col < h.nx; ++col) {
-         sq = row * h.nx + col;
-	 z[sq] = zwork[col];
-      }
+    for (col = 0; col < h.nx; ++col) {
+      sq = row * h.nx + col;
+      z[sq] = zwork[col];
+    }
 
-   } /*end for row */ 
+  } /*end for row */ 
   
   free(zwork);
 
@@ -630,6 +628,8 @@ void print_usage(char *program)
     fprintf(stderr, "-L<xlen>[/<ylen>] [-M<mask_file> ] [-O<output_file>] [-P]");
     fprintf(stderr, "  [-S<xradius>/<yradius>]  [-:] [-h]\n\n");
     fprintf(stderr, "-B   sets the grid bounds in user units: xmin/xmax/ymin/ymax.\n");
+    /*    fprintf(stderr, "-E   Allows horizontal extrapolation if only one grid node is found.\n");
+	  fprintf(stderr, "     If not specified, then only interpolation is allowed.\n");*/
     fprintf(stderr, "-I   sets the grid spacing for the x/y directions.\n");
     fprintf(stderr, "-L   set x,y search radii in integer gridnodes \n");
     fprintf(stderr, "      If no data are within this range of a node, it is set to empty. \n");

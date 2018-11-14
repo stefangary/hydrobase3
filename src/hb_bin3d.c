@@ -140,8 +140,10 @@ struct deepestrec {
           struct deepestrec *next;
 };
 
+/* The grid node structure holds all information necessary
+ * at each grid node. */
 struct gridnode {
-         double **prop;
+         double **prop;  /* accumulating sums for each property avg */
 	 double **dprop, **dpropsq;  /* for computing variance */
 	 double **weightsum;
          double  *d;
@@ -360,7 +362,9 @@ int main (int argc, char **argv)
 
                case 'U':
                         error = (sscanf(&argv[i][2],"%lf", &bottom_seasonal_layer) == 1) ? 0 : 1;
+		        fprintf(stderr,"\nBottom of seasonal layer is %lf",bottom_seasonal_layer);
                         break;
+			
                case 'W':
                         error = (sscanf(&argv[i][2],"%d", &window) == 1) ? 0 : 1;
                         st = &argv[i][2];
@@ -447,13 +451,13 @@ int main (int argc, char **argv)
       use_month[0] = 1;  
       fprintf(stderr,"\nOne output file will be generated for ");
    } 
-   else  
+   else  {
       fprintf(stderr,"\nSeparate output files will be generated for "); 
-
+   }
    for (i=0; i < NMONTHS; ++i) {
       if (use_month[i])
          fprintf(stderr, "%s ",print_month(i));
-   } 
+   }
 
    if (lengthscale == 0)
       no_distance_weight = 1;
@@ -504,6 +508,7 @@ int main (int argc, char **argv)
    fprintf(stderr,"\n allocating memory for grid ... " );
 
    for (tbin = 0; tbin < ntbins; ++tbin) {
+     fprintf(stderr,"\n tbin = %i",tbin);
      grid[tbin] = alloc_grid(ncols, nrows, nsiglevs, nprops);
    }
    fprintf(stderr,"\n");
@@ -584,18 +589,21 @@ int main (int argc, char **argv)
        
        if (in_bounds) {
        
+	 /* Check for presence of T90. */
          if (sta.observ[(int)T90] == NULL ) {
-		if (available(TE,&hdr)) {
-		   free_and_alloc(&sta.observ[(int)T90], hdr.nobs);
-		   t68_to_t90(sta.observ[(int)TE], sta.observ[(int)T90], hdr.nobs);
-		   free(sta.observ[(int)TE]);
-		   sta.observ[(int)TE] = NULL;
+	   /* If T68 is available, automatically convert to T90
+	    * and delete the T68 data. */
+	   if (available(TE,&hdr)) {
+	     free_and_alloc(&sta.observ[(int)T90], hdr.nobs);
+	     t68_to_t90(sta.observ[(int)TE], sta.observ[(int)T90], hdr.nobs);
+	     free(sta.observ[(int)TE]);
+	     sta.observ[(int)TE] = NULL;
 		   
-		   for (i=0; i< sta.nprops; ++i) {
-		         if (hdr.prop_id[i] == (int)TE)
-		            hdr.prop_id[i] = (int)T90;
-		   }    
- 		}	      
+	     for (i=0; i< sta.nprops; ++i) {
+	       if (hdr.prop_id[i] == (int)TE)
+		 hdr.prop_id[i] = (int)T90;
+	     }    
+	   }	      
 	 }
          ratio_done = 0;
          pr = sta.observ[(int)PR];   /* set frequently used pointers */
@@ -1019,7 +1027,7 @@ NEXTFILE1:
 
 /* loop for each input_file */
 
-   fprintf(stderr,"\n    summing ...");
+   /*fprintf(stderr,"\n    summing ...");*/
    curfile = 1;
    
    do {
@@ -1040,19 +1048,19 @@ NEXTFILE1:
           hdr.lon += 360;
 
        if (get_indices(&h, hdr.lat, hdr.lon, &row, &col) == 0) {
-	 
+	 /* Check for presence of T90 and if only T68 is present,
+	  * then auto convert to T90 and kill the T68. */
 	 if (sta.observ[(int)T90] == NULL) {
 	   if (available(TE,&hdr)) {
 	     free_and_alloc(&sta.observ[(int)T90], hdr.nobs);
 	     t68_to_t90(sta.observ[(int)TE], sta.observ[(int)T90], hdr.nobs);
 		   
 	     for (i=0; i< sta.nprops; ++i) {
-		  if (hdr.prop_id[i] == (int)TE)
-		      hdr.prop_id[i] = (int)T90;
+	       if (hdr.prop_id[i] == (int)TE)
+		 hdr.prop_id[i] = (int)T90;
 	     }
 	   }    
 	 }
-	 
 	 pr = sta.observ[(int)PR];   /* set frequently used pointers */
          de = sta.observ[(int)DE];
          te = sta.observ[(int)T90];
@@ -1077,6 +1085,7 @@ NEXTFILE1:
               if (hdr.year >= h.tmin[tbin] && hdr.year <= h.tmax[tbin]) {
 
                 if (prop_avail) {
+		  /*fprintf(stderr,"\n Got to sum_levels...");*/
                   sum_levels(sta.observ[index], de, hdr.nobs, grid[tbin][row][col].prop[i], grid[tbin][row][col].dpropsq[i], grid[tbin][row][col].count[i], grid[tbin][row][col].month_prop[hdr.month][i], grid[tbin][row][col].month_dpropsq[hdr.month][i], grid[tbin][row][col].month_count[hdr.month][i]);
                 }
 
@@ -1322,6 +1331,7 @@ int parse_p_option(char *st, int *prop_indx)
          exit(0);
   }
 
+  /* n is counter for number of properties */
   n = 0;
   do {
      if (*st == '/')
@@ -1341,46 +1351,51 @@ int parse_p_option(char *st, int *prop_indx)
      if (prop_indx[n] == (int)PR)
          ipr = n;
      if (prop_indx[n] == (int)T90 || prop_indx[n] == (int)TE || prop_indx[n] == (int)TH9 || prop_indx[n] == (int)TH) {
-         if (ite < 0) {
-	    tindex = prop_indx[n];
-            ite = n;
-	 }
-	 else {
-	    fprintf(stderr, "Specify a single temperature property for output:  ie: t90(recommended), te, th9 or th\n");
-	    exit(1);
-	 } 
-	 if (tindex != (int)T90) {
-	    fprintf(stderr, "\nT90 is the recommended temperature output variable. \n You have specified %s\n", prop);
-	 }
+       /* Global variable ite is set to -1
+	* when program is initialized, gets
+	* set to sane value at first detection
+	* of requested property.  Use this to
+	* detect multiple temp requests, which
+	* are not permitted.*/
+       if (ite < 0) {
+	 /* Based on whichever temperature that is
+	  * requested, we now use that temperature.*/
+	 tindex = prop_indx[n];
+	 ite = n;
+       }
+       else {
+	 fprintf(stderr,"\n Specify a single temperature property for output!");
+         fprintf(stderr,"\n ie: t90(recommended), te, th9 or th.\n");
+	 exit(1);
+       } 
+       if (tindex != (int)T90) {
+	 fprintf(stderr,"\n T90 is the recommended temperature output variable.");
+	 fprintf(stderr,"\n You have specified %s\n", prop);
+       }
      }
      if (prop_indx[n] == (int)SA)
-         isa = n;
+       isa = n;
      st += strlen(prop);
      
      /* !**!  Special cases for properties */
-     
      if ((prop_indx[n] == (int)S_)  || (prop_indx[n] == (int)PE) || (prop_indx[n] == (int)HT) ) {
-        fprintf(stderr,"\nWARNING density and derivative properties like dynamic height are not appropriate  to average isopycnally.");
-        fprintf(stderr,"\nCompute from averaged pr,te,sa output by hb_bin3d.\n");
-	
+       fprintf(stderr,"\n WARNING: density and derivative properties");
+       fprintf(stderr,"\n like dynamic height are not appropriate  to average isopycnally.");
+       fprintf(stderr,"\nCompute from averaged pr,te,sa output by hb_bin3d.\n");
      }
-     
-
      if ((prop_indx[n] == (int) GE) || (prop_indx[n] == (int) GN)) {
-        fprintf(stderr,"\nWARNING neutral density (gamma-n) is not an appropriate property to average isopycnally.");
-        fprintf(stderr,"\nCompute from averaged pr,te,sa output by hb_bin3d.\n");
-	
+       fprintf(stderr,"\n WARNING: neutral density (gamma-n) is not an");
+       fprintf(stderr,"\n appropriate property to average isopycnally.");
+       fprintf(stderr,"\nCompute from averaged pr,te,sa output by hb_bin3d.\n");
      }
-     
      /* Don't count these properties... */
      if ( (prop_indx[n] == (int) DE)  || (prop_indx[n] == (int) GE) || (prop_indx[n] == (int) GN) ||(prop_indx[n] == (int)S_)  || (prop_indx[n] == (int)PE) || (prop_indx[n] == (int)HT) || prop_indx[n] > 100 )
         --n;
       
-      ++n;
-   } while (*st == '/');
-   
-   
-   return (n);
+     ++n;
+  } while (*st == '/');
+  fprintf(stderr,"\n Found %i properties requested.",n);
+  return (n);
 }  /* end parse_p_option() */
 
 /*****************************************************************************/
@@ -2857,10 +2872,15 @@ void define_sigma_transitions(struct gridnode *g, int nprops)
    int i, j, n, refstart, refstop, iref;
    
   /* trim seasonal layer to upper 200 m */
-     
+   
+   /* For each month... */
    for (n = 0; n < NMONTHS; ++n) {
-      for (i = 0; i < nsig[0]; ++i) {
-         if (g->month_dnobs[n][i] > 0) {
+
+     /* For each reference level... */
+     for (i = 0; i < nsig[0]; ++i) {
+
+       /* If there are observations this month at this location... */
+       if (g->month_dnobs[n][i] > 0) {
 	   if (g->month_d[n][i] < 0 || g->month_d[n][i] >= bottom_seasonal_layer) {
 	     g->month_dnobs[n][i] = 0;
 	     for (j = 0; j < nprops;  ++j) {
@@ -4014,6 +4034,8 @@ void sum_levels(double *y, double *d, int ny, double *ysum, double *ysq_sum, UI 
    int  i, j, nz, datagap, n;
    double *ytmp, *dtmp, yint, flag;
 
+   /*fprintf(stderr,"\n Started sum_levels...");*/
+
    ytmp = (double *) calloc((size_t)ny, sizeof(double));
    dtmp = (double *) calloc((size_t)ny, sizeof(double));
    if (dtmp == NULL) {
@@ -4021,10 +4043,15 @@ void sum_levels(double *y, double *d, int ny, double *ysum, double *ysq_sum, UI 
        exit(1);
    }
 
+   /*fprintf(stderr,"\n Allocated memory in sum_levels...");*/
+
    nz = NSTDLEVS - 1;   /* NSTDLEVS is globally defined and includes a bottom depth*/
    flag = HBEMPTY + 1.0;  
    
-/* Ensure continuous (no missing values) for  y and d arrays */
+/* Ensure continuous (no missing values) for  y and d arrays 
+ * by copying only valid data into ytmp and dtmp. Also, augment
+ * n by one unit once we have copied the data. n stores the
+ * number of valid points. */
    n = 0;
    for (i = 0; i < ny; ++i) {
       if ( y[i] > -8.9)  {
@@ -4033,23 +4060,34 @@ void sum_levels(double *y, double *d, int ny, double *ysum, double *ysq_sum, UI 
       }
    }
    
+   /* There are not enough values if there are at most 1 good observation
+    * in this profile.  Cannot do any interpolation, so skip this one.*/
    if (n <= 1) {               /* not enough values */
      free((void *)ytmp);
      free((void *)dtmp);
      return;
    }
 
+   /*fprintf(stderr,"\n nz= %i ",nz); 
+     fprintf(stderr,"\n n= %i ",n);*/
 
+   /* Loop over each standard level... */
    for (i = 0; i < nz; ++i) { 
-      if ((yint = interpolate(std_depth[i], dtmp, ytmp, n)) > flag) {
-      
 
-            /* now check for datagaps around this depth...*/
+     /* Interpolate the valid input data to this standard level.
+      * The flag is HBEMPTY + 1 = -9 + 1 = -8, if value is not
+      * present, then skip rest. */
+     if ((yint = interpolate(std_depth[i], dtmp, ytmp, n)) > flag) {
+      
+	/* now check for datagaps around this depth...*/
+	/*fprintf(stderr,"\n %i ",i);*/
 	    
             j = 0;
             while (j < n && dtmp[j] < std_depth[i]) 
                ++j ;
-		
+	
+	    /*fprintf(stderr,"Found j = %i",j);*/
+	
 	    datagap = 0;
             if ((dtmp[j] == std_depth[i]) )
                 datagap = 0;
@@ -4063,24 +4101,44 @@ void sum_levels(double *y, double *d, int ny, double *ysum, double *ysq_sum, UI 
                    datagap = (dtmp[j] - dtmp[j-1]) > GAP_DEEP;
             }              
   
+	    /*fprintf(stderr," datagap = %i",datagap);*/
+
             if (!datagap) {
 	    
 	       if (std_depth[i] <= bottom_seasonal_layer) {
+		 /*fprintf(stderr," in seasonal layer ");*/
 	          seas_sum[i] += yint;
 		  seas_sqsum[i] += yint * yint;
 		  ++seas_count[i];
 	       }
 	       else {
-                  ysum[i] += yint;
-		  ysq_sum[i] += yint *yint;
-                  ++count[i];
+		 /*fprintf(stderr,"\n below seasonal layer ");
+		 fprintf(stderr,"\n yint = %f",yint);
+		 fprintf(stderr,"\n i = %i",i);
+		 fprintf(stderr,"\n ysum[1] = %f",ysum[1]);
+		 fprintf(stderr,"\n ysum[i] = %f",ysum[i]);
+		 fprintf(stderr,"\n ysq_sum[i] = %f",ysq_sum[i]);
+		 fprintf(stderr,"\n count[i] = %i",count[i]);
+		 There is a strange seg fault error here
+		 when -U is nonzero.  Ysum does not appear to
+		 be allocated, will segfault with ysum[1] as
+		 well as ysum[i] under some conditions.*/
+		 ysum[i] += yint;
+		 ysq_sum[i] += yint *yint;
+		 ++count[i];
+
 	       }
             }
        } /* end if */
    } /* end for i */
    
+   /*fprintf(stderr,"\n End of work in sum_levels...");*/
+
    free((void *)ytmp);
    free((void *)dtmp);
+
+   /*fprintf(stderr,"\n Done deallocating y and d in sum_levels...");*/
+
    return;
 
 } /* end sum_levels() */
@@ -4132,9 +4190,7 @@ void do_pycnostads(int nc_file, struct gridnode ***grid, struct CDF_HDR *hptr,  
 	       j = 0;
 	       while (j < nlevs && std_depth[j] < *bottomdepth) {
 		  if (is_flagged(data[i][j], (float)HBEMPTY)) {
-		  
 		     if (std_depth[j] <= bottom_seasonal_layer) {
-		     
 		        if (grid[tbin][row][col].month_count[imonth][i][j] > 0) {
 		          count[i][j] = (short) grid[tbin][row][col].month_count[imonth][i][j];
 		          data[i][j] = (float) (grid[tbin][row][col].month_prop[imonth][i][j] / (double) count[i][j]);

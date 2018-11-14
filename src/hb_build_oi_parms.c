@@ -3324,11 +3324,11 @@ void fill_missing_nodes(int ncid, struct NC_INFO *ncinfo_ptr, struct NC_PARMS *p
 	    }
 	       
 	    start[2] = ilev;
-	    if (Tp1[ilev][iwsq] < testempty) {
+	    if (Tp1[ilev][iwsq] < 0) {
 	         theMean = (float) fill_it(iwsq, theLat, theLon, Tp1[ilev], &work_grid, &small_grid, latmin, lonmin, latmax, lonmax, maxdist);
 		++nempty;
 		
-		if (theMean < testempty) {
+		if (theMean < 0) {
 		   if ((ilev > 0) && (Tp1[ilev-1][iwsq] > testempty) && (Tp1[ilev-1][iwsq] < testmask))
 		       theMean = Tp1[ilev-1][iwsq];
 		       
@@ -3346,9 +3346,9 @@ fprintf(stderr,"Filled: %.0f m %8.3lf %8.3lf %.6f {%d,%d,%d}\n", parms_ptr->dept
 		} 
 	    }
 	    
-	    if (Tp2[ilev][iwsq] < testempty) {
+	    if (Tp2[ilev][iwsq] < 0) {
 	        theMean = (float) fill_it(iwsq, theLat, theLon, Tp2[ilev], &work_grid, &small_grid, latmin, lonmin, latmax, lonmax, maxdist);
-		if (theMean < testempty) {
+		if (theMean < 0) {
 		   if (ilev > 0 && Tp2[ilev-1][iwsq] > testempty && Tp2[ilev-1][iwsq] < testmask)
 		       theMean = Tp2[ilev-1][iwsq];
 		}
@@ -3357,9 +3357,9 @@ fprintf(stderr,"Filled: %.0f m %8.3lf %8.3lf %.6f {%d,%d,%d}\n", parms_ptr->dept
 		   error = ncparms_write_var(ncid,"Tparm2", start, count, &theMean);
 		}  
 	    }
-	    if (Tp0[ilev][iwsq] < testempty) {
+	    if (Tp0[ilev][iwsq] < 0) {
 	        theMean = (float) fill_it(iwsq, theLat, theLon, Tp0[ilev], &work_grid, &small_grid, latmin, lonmin, latmax, lonmax, maxdist);
-		if (theMean < testempty) {
+		if (theMean < 0) {
 		   if (ilev > 0 && Tp0[ilev-1][iwsq] > testempty && Tp0[ilev-1][iwsq] < testmask)
 		       theMean = Tp0[ilev-1][iwsq];
 		}
@@ -3371,9 +3371,9 @@ fprintf(stderr,"Filled: %.0f m %8.3lf %8.3lf %.6f {%d,%d,%d}\n", parms_ptr->dept
 	    
 	    if (ilev > ncinfo_ptr->nz_seas) {
 	       
-	       if (Pp0[ilev][iwsq] < testempty) {
+	       if (Pp0[ilev][iwsq] < 0) {
 	           theMean = (float) fill_it(iwsq, theLat, theLon, Pp0[ilev], &work_grid, &small_grid, latmin, lonmin, latmax, lonmax, maxdist);
-		if (theMean < testempty) {
+		if (theMean < 0) {
 		   if (ilev > 0 && Pp0[ilev-1][iwsq] > testempty && Pp0[ilev-1][iwsq] < testmask)
 		       theMean = Pp0[ilev-1][iwsq];
 		}
@@ -3383,9 +3383,9 @@ fprintf(stderr,"Filled: %.0f m %8.3lf %8.3lf %.6f {%d,%d,%d}\n", parms_ptr->dept
 		}  
 		   
 	       }  
-	       if (Pp1[ilev][iwsq] < testempty){
+	       if (Pp1[ilev][iwsq] < 0){
 	           theMean = (float) fill_it(iwsq, theLat, theLon, Pp1[ilev], &work_grid, &small_grid, latmin, lonmin, latmax, lonmax, maxdist);
-	       if (theMean < testempty) {
+	       if (theMean < 0) {
 		   if (ilev > 0 && Pp1[ilev-1][iwsq] > testempty && Pp1[ilev-1][iwsq] < testmask)
 		       theMean = Pp1[ilev-1][iwsq];
 	       }
@@ -3395,9 +3395,9 @@ fprintf(stderr,"Filled: %.0f m %8.3lf %8.3lf %.6f {%d,%d,%d}\n", parms_ptr->dept
 		   }  
 	       }
 	       
-	       if (Pp2[ilev][iwsq] < testempty) {
+	       if (Pp2[ilev][iwsq] < 0) {
 	           theMean = (float) fill_it(iwsq, theLat, theLon, Pp2[ilev], &work_grid, &small_grid, latmin, lonmin, latmax, lonmax, maxdist);
-		if (theMean < testempty) {
+		if (theMean < 0) {
 		   if (ilev > 0 && Pp2[ilev-1][iwsq] > testempty && Pp2[ilev-1][iwsq] < testmask)
 		       theMean = Pp2[ilev-1][iwsq];
 		}
@@ -3410,9 +3410,9 @@ fprintf(stderr,"Filled: %.0f m %8.3lf %8.3lf %.6f {%d,%d,%d}\n", parms_ptr->dept
 	    }
 	    
 	    
-	    if (Sp0[ilev][iwsq] < testempty) {
+	    if (Sp0[ilev][iwsq] < 0) {
 	        theMean = (float) fill_it(iwsq, theLat, theLon, Sp0[ilev], &work_grid, &small_grid, latmin, lonmin, latmax, lonmax, maxdist);
-		if (theMean < testempty) {
+		if (theMean < 0) {
 		   if (ilev > 0 && Sp0[ilev-1][iwsq] > testempty && Sp0[ilev-1][iwsq] < testmask)
 		       theMean = Sp0[ilev-1][iwsq];
 		}
@@ -3422,9 +3422,9 @@ fprintf(stderr,"Filled: %.0f m %8.3lf %8.3lf %.6f {%d,%d,%d}\n", parms_ptr->dept
 		   }  
 	    }
 	    
-	    if (Sp1[ilev][iwsq] < testempty) {
+	    if (Sp1[ilev][iwsq] < 0) {
 	        theMean = (float) fill_it(iwsq, theLat, theLon, Sp1[ilev], &work_grid, &small_grid, latmin, lonmin, latmax, lonmax, maxdist);
-		if (theMean < testempty) {
+		if (theMean < 0) {
 		   if (ilev > 0 && Sp1[ilev-1][iwsq] > testempty && Sp1[ilev-1][iwsq] < testmask)
 		       theMean = Sp1[ilev-1][iwsq];
 		}
@@ -3434,9 +3434,9 @@ fprintf(stderr,"Filled: %.0f m %8.3lf %8.3lf %.6f {%d,%d,%d}\n", parms_ptr->dept
 		   }  
 	    }
 	    
-	    if (Sp2[ilev][iwsq] < testempty) {
+	    if (Sp2[ilev][iwsq] < 0) {
 	        theMean = (float) fill_it(iwsq, theLat, theLon, Sp2[ilev], &work_grid, &small_grid, latmin, lonmin, latmax, lonmax, maxdist);
-		if (theMean < testempty) {
+		if (theMean < 0) {
 		   if (ilev > 0 && Sp2[ilev-1][iwsq] > testempty && Sp2[ilev-1][iwsq] < testmask)
 		       theMean = Sp2[ilev-1][iwsq];
 		}

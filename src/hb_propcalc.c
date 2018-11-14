@@ -228,7 +228,7 @@ main (int argc, char **argv)
              goto NEXTFILE;
         }
         else 
-          fprintf(stderr,"\nStation input expected from stdin...\n");
+          fprintf(stderr,"\nhb_propcalc: Station input expected from stdin...\n");
      
             /* read each file completely */
 

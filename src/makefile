@@ -12,8 +12,8 @@
 #  define these paths before making anything ...
 #-----------------------------------------------------------------------------
 INCLUDE= .
-NETCDFLIB = /usr/local/netcdf/lib
-NETCDFINC = /usr/local/netcdf/include
+NETCDFLIB = /usr/local/netcdf_3/lib
+NETCDFINC = /usr/local/netcdf_3/include
 BINDIR = ../bin
 #
 #-----------------------------------------------------------------------------
@@ -53,7 +53,7 @@ VGRAMS_H = $(INCLUDE)/hb_variograms.h
 ZGRID_H = $(INCLUDE)/zgrid.h
 #
 
-PROG_SRC =  hb_bin3d.c hb_columns.c  hb_distdepth.c  hb_extract.c hb_ncfg3d.c  hb_foverh.c hb_getbottom.c hb_getpos.c   hb_grid2xyz.c hb_gridsection.c hb_gridsurf2d.c hb_layerav.c hb_msq10bounds.c  hb_mssort.c hb_nc2asc.c hb_ncinfo.c hb_ncmerge.c hb_ncoi3d.c hb_ncslice.c  hb_ncsmooth3d.c hb_ncsurf2d.c hb_propcalc.c hb_prseries.c hb_section.c hb_siftlevs.c hb_siftsta.c hb_smoothsurf2d.c  hb_stationsort.c  hb_surf2d.c hb_surfdiff2d.c hb_topo2xyz.c  hb_toposlice.c hb_updatehdr.c hb_xyprop.c hb_xyzprop.c woa_convert.c woce_btl2hb.c  woce_ctd2hb.c  wod_convert.c 
+PROG_SRC =  hb_bin3d.c hb_columns.c  hb_distdepth.c  hb_extract.c hb_random.c hb_ncfg3d.c  hb_foverh.c hb_getbottom.c hb_getpos.c   hb_grid2xyz.c hb_gridsection.c hb_gridsurf2d.c hb_layerav.c hb_msq10bounds.c  hb_mssort.c hb_mysort.c hb_nc2asc.c hb_ncinfo.c hb_ncmerge.c hb_ncoi3d.c hb_ncslice.c  hb_ncsmooth3d.c hb_ncsurf2d.c hb_propcalc.c hb_prseries.c hb_section.c hb_siftlevs.c hb_siftsta.c hb_smoothsurf2d.c  hb_stationsort.c  hb_surf2d.c hb_surfdiff2d.c hb_topo2xyz.c  hb_toposlice.c hb_updatehdr.c hb_xyprop.c hb_xyzprop.c woa_convert.c woce_btl2hb.c  woce_ctd2hb.c  wod_convert.c 
 PROG_OBJ = ${PROG_SRC:.c=.o}
 PROGRAMS = ${PROG_SRC:.c=}
 UTILS_SRC = eos80.c hydro_cdf.c gamma_subs.c grid_subs.c hydro_utils.c julconv.c matrix_subs.c mem_subs.c oi3d_utils.c phyprops.c prop_subs.c topo_subs.c vgram_subs.c zgrid.c
@@ -108,6 +108,9 @@ hb_distdepth:  	hb_distdepth.o topo_subs.o grid_subs.o mem_subs.o
 hb_extract:	hb_extract.o hydro_utils.o prop_subs.o phyprops.o eos80.o
 	$(LINK) $(LDFLAGS) hb_extract.o  hydro_utils.o prop_subs.o phyprops.o eos80.o -o hb_extract $(LIBS)
 #
+hb_random:	hb_random.o hydro_utils.o prop_subs.o phyprops.o eos80.o
+	$(LINK) $(LDFLAGS) hb_random.o  hydro_utils.o prop_subs.o phyprops.o eos80.o -o hb_random $(LIBS)
+#
 hb_findblanks:		hb_findblanks.o 
 	$(LINK) $(LDFLAGS) hb_findblanks.o $(LIBS) -o hb_findblanks 
 #
@@ -148,6 +151,9 @@ hb_msq10bounds:	hb_msq10bounds.o
 #
 hb_mssort:	hb_mssort.o hydro_utils.o prop_subs.o phyprops.o eos80.o
 	$(LINK) $(LDFLAGS) hb_mssort.o  hydro_utils.o prop_subs.o phyprops.o eos80.o -o hb_mssort $(LIBS)
+#
+hb_mysort:	hb_mysort.o hydro_utils.o prop_subs.o phyprops.o eos80.o
+	$(LINK) $(LDFLAGS) hb_mysort.o  hydro_utils.o prop_subs.o phyprops.o eos80.o -o hb_mysort $(LIBS)
 #
 hb_nc2asc:	hb_nc2asc.o hydro_utils.o hydro_cdf.o prop_subs.o phyprops.o eos80.o
 	$(LINK) $(LDFLAGS) hb_nc2asc.o hydro_utils.o hydro_cdf.o prop_subs.o phyprops.o  eos80.o $(CDF_L) -o hb_nc2asc $(LIBS)
@@ -323,6 +329,9 @@ hb_distdepth.o:	hb_distdepth.c $(MEMORY_H) $(PATHS_H) $(GRIDS_H)
 hb_extract.o:	hb_extract.c $(HYDRO_H)
 	$(CC)  $(CFLAGS) $(DEBUG) hb_extract.c
 #
+hb_random.o:	hb_random.c $(HYDRO_H)
+	$(CC)  $(CFLAGS) $(DEBUG) hb_random.c
+#
 hb_findblanks.o:	hb_findblanks.c 
 	$(CC)  $(CFLAGS) $(DEBUG) hb_findblanks.c
 #
@@ -367,6 +376,9 @@ hb_msq10bounds.o:	hb_msq10bounds.c
 #
 hb_mssort.o:	hb_mssort.c $(HYDRO_H)
 	$(CC)  $(CFLAGS) $(DEBUG) hb_mssort.c
+#
+hb_mysort.o:	hb_mysort.c $(HYDRO_H)
+	$(CC)  $(CFLAGS) $(DEBUG) hb_mysort.c
 #
 hb_nc2asc.o:       hb_nc2asc.c $(HYDRO_CDF_H) $(HYDRO_H) $(CDF_H) 
 	$(CC) $(CFLAGS) $(DEBUG)  -I$(NETCDFINC)  hb_nc2asc.c

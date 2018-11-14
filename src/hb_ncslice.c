@@ -415,7 +415,8 @@ int parse_p_option(char *st)
      /* !**!  Special cases for properties */
 
       if (((enum property)index == S_ ) || ((enum property) index == HT) || ((enum property) index == PE)) {
-         if (sscanf(st, "%lf", &ref_val) != 1) {
+	/* sfg: hb_propcalc.c - has st+2 in this line, test by adding +2*/
+         if (sscanf(st+2, "%lf", &ref_val) != 1) {
              fprintf(stderr, "\n Specify a ref pressure for  %.2s", prop);
              fprintf(stderr,"\n   ex: -P%.2s1500/th/sa\n", prop);
              exit(1);

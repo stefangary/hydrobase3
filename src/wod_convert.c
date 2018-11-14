@@ -456,7 +456,10 @@ int check_sta()
    found = 0;
    i = 0;
    while (!found && (i < nsec)) {
-      found = seccode[i] == 3;    /* secondary header code for OCL Platform */
+     /* secondary header code for OCL Platform is 3
+      * so if seccode[i] == 3, then found is assigned
+      * a value of true, otherwise, stays at 0. */
+      found = seccode[i] == 3;
       ++i;
    }
    

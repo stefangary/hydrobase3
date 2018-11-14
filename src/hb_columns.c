@@ -77,7 +77,8 @@ double ht_pref;           /* ref lev for computing dynamic height */
 int window, w_incr;     /* used to specify pr window for gradient properties*/
 int tindex;              /* index to temperature variable */
 
-int yopt, lopt, sopt, mopt, dopt;   /* option flags */
+int yopt, lopt, sopt, mopt, dopt, uopt;   /* option flags */
+int station_id;          /* for use with -U */
 FILE *outfile;
 
 struct GAMMA_NC ginfo;
@@ -116,13 +117,14 @@ main (int argc, char **argv)
     extent_list = (char **) calloc((size_t)MAXEXT, (size_t) sizeof(char *));
     n_extents = 0;
     extent_list[0] = EXTENT;
-    popt = yopt = lopt = sopt = mopt = dopt = 0;
+    popt = yopt = lopt = sopt = mopt = dopt = uopt = 0;
     error = 0;
     s_pref = -1;
     window = 100;
     w_incr = 10;
     outfile = stdout;
-
+    station_id = 10000000;  /* Allow for 9 million profiles in a single file! */
+    
 /* initialize these ... */
 
    for (i = 0; i < MAXPROP; ++i) {
@@ -204,6 +206,9 @@ main (int argc, char **argv)
 			       error = 1;
 			}
 			break;
+	       case 'U':
+                        uopt = 1;
+                        break;
                case 'W':
                         error = (sscanf(&argv[i][2],"%d", &window) == 1) ? 0 : 1;
                         st = &argv[i][2];
@@ -253,8 +258,8 @@ main (int argc, char **argv)
        infile = stdin;
    }
 
-   if (! ( lopt || mopt || sopt || yopt)) {
-       fprintf(stderr,"\nWARNING! no header info (year, month, position, cruise or station id) \nhas been specified for output.\n");
+   if (! ( lopt || mopt || sopt || yopt || uopt)) {
+     fprintf(stderr,"\nWARNING! no header info (year, month, position, cruise or station id) \nhas been specified for output.\n");
    }
    
 
@@ -318,8 +323,10 @@ void print_usage(char *program)
    fprintf(stderr,"\n   [-W] : Specifies pressure window length and subdivisions (db) for computing ");
    fprintf(stderr,"\n          gradient properties (bf, pv)  ");
    fprintf(stderr,"\n          defaults: -W100/10");
-   fprintf(stderr,"\n    [-h] help...... prints this message. \n");
-
+   fprintf(stderr,"\n   [-U] : output a unique cast number for each cast written.");
+   fprintf(stderr,"\n          this is currently simply the count of each cast in");
+   fprintf(stderr,"\n          the .hb file that is input to this routine.");
+   fprintf(stderr,"\n   [-h] : help...... prints this message. \n");
    fprintf(stderr,"\n\n");  
    return;
 }
@@ -587,6 +594,9 @@ void get_hydro_data(FILE * file)
        index = prop_req[i];
        hdr.prop_id[j++] = index;
     }
+
+    /* calculate the station ID */
+    station_id = station_id + 1;
     
     nbytes = 0;
     st = &str[0];
@@ -616,6 +626,12 @@ void get_hydro_data(FILE * file)
     if (sopt) {
        sprintf(st,"%5d %4d ", hdr.cruise, hdr.station);
        nbytes += 11;
+    }
+
+    st = &str[nbytes];
+    if (uopt) {
+       sprintf(st,"%8d ", station_id);
+       nbytes += 9;
     }
 
     len_str = strlen(str);   

@@ -12,9 +12,10 @@
 #  define these paths before making anything ...
 #-----------------------------------------------------------------------------
 INCLUDE= .
-NETCDFLIB = /usr/local/netcdf_3/lib
-NETCDFINC = /usr/local/netcdf_3/include
-BINDIR = ../bin
+NETCDFLIB = /usr/local/netcdf3/lib
+NETCDFINC = /usr/local/netcdf3/include
+#BINDIR = ../bin
+BINDIR = /usr/local/hb3/bin
 #
 #-----------------------------------------------------------------------------
 DEBUG= -g   # set to -g to turn on debugging and set OPTIMIZE to a blank

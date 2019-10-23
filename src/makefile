@@ -16,6 +16,8 @@ NETCDFLIB = /usr/local/netcdf3/lib
 NETCDFINC = /usr/local/netcdf3/include
 #BINDIR = ../bin
 BINDIR = /usr/local/hb3/bin
+LIBDIR = /usr/local/hb3/lib
+LISTDIR = /usr/local/hb3/lists
 #
 #-----------------------------------------------------------------------------
 DEBUG= -g   # set to -g to turn on debugging and set OPTIMIZE to a blank
@@ -76,6 +78,8 @@ other:          $(OTHER)
 install:	hydrobase 
 	chmod 755 $(PROGRAMS)
 	mv $(PROGRAMS) $(BINDIR)
+	rsync -av ../lib/ ${LIBDIR}
+	rsync -av ../lists/ ${LISTDIR}
 #
 install_qc:	qc 
 	chmod 755 $(QC)

@@ -18,13 +18,13 @@ LISTPATH is the directory for HydroBase files which define isopycnal ranges for 
 OI_PARMS_FILE contains variogram and gradient parameters for use in optimal interpolation.
 */
 
-#define LIBPATH "/home/sa03sg/src/HB3/lib/"
-#define LISTPATH "/home/sa03sg/src/HB3/lists/"
+#define LIBPATH "/usr/local/hb3/lib/"
+#define LISTPATH "/usr/local/hb3/lists/"
 
-#define BATHPATH "/home/sa03sg/src/HB3/lib/etopo1_ice_gline.grd"
-#define BATHPATH_C "/home/sa03sg/src/HB3/lib/topo_tenthdeg_ice_gline.grd"
+#define BATHPATH "/usr/local/hb3/lib/etopo1_ice_gline.grd"
+#define BATHPATH_C "/usr/local/hb3/lib/topo_tenthdeg_ice_gline.grd"
 
-#define GAMMA_NC_PATH "/home/sa03sg/src/HB3/lib/gamma.nc"
-#define SHIPCODE_PATH "/home/sa03sg/src/HB3/lib/wod_shipcodes.txt"
+#define GAMMA_NC_PATH "/usr/local/hb3/lib/gamma.nc"
+#define SHIPCODE_PATH "/usr/local/hb3/lib/wod_shipcodes.txt"
 
-#define OI_PARMS_FILE "/home/sa03sg/src/HB3/lib/global_oi_parms.nc"
+#define OI_PARMS_FILE "/usr/local/hb3/lib/global_oi_parms.nc"

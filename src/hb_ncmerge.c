@@ -283,7 +283,10 @@ main(int argc, char **argv)
       gptr->x_max = 180.;
       gptr->y_min = -90.;
       gptr->y_max = 90.;
-      topo = hb_get_topo(BATHPATH, gptr, &latvec, &lonvec, FALSE, FALSE, &missingval);
+      /* Changed BATHPATH to BATHPATH_C for 
+       * coarser resolution topography data
+       * for default.*/
+      topo = hb_get_topo(BATHPATH_C, gptr, &latvec, &lonvec, FALSE, FALSE, &missingval);
     if (topo == NULL) {
        fprintf(stderr,"\nFatal error in hb_get_topo(). \n");
        exit(1);
